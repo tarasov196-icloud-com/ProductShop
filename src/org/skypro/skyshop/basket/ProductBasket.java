@@ -3,47 +3,58 @@ package org.skypro.skyshop.basket;
 import org.skypro.skyshop.product.Product;
 
 public class ProductBasket {
-
     private final Product[] products;
-    private int count;
+    private int counter;
 
     public ProductBasket() {
         this.products = new Product[5];
-        this.count = 0;
+        this.counter = 0;
     }
 
     public void addProduct(Product product) {
-        if (count < products.length) {
-            products[count] = product;
-            count++;
+        if (counter < products.length) {
+            products[counter] = product;
+            counter++;
         } else {
-            System.out.println("Невозможно добавить продукт");
+            System.out.println("В корзине нет места");
         }
     }
 
-    public int getTotalPrice() {
+    public int totalCostBasket() {
         int total = 0;
-        for (int i = 0; i < count; i++) {
-            total += products[i].getPrice();
+        for (int i = 0; i < counter; i++) {
+            if (products[i] != null) {  // Защита от null
+                total += (int) products[i].getPrice();
+            }
         }
         return total;
     }
 
+
     public void printBasket() {
-        if (count == 0) {
-            System.out.println("в корзине пусто");
+        if (counter == 0) {
+            System.out.println("В корзине пусто");
             return;
         }
+        System.out.println("Содержимое корзины:");
 
-        for (int i = 0; i < count; i++) {
-            System.out.println(products[i].getName() + ": " + products[i].getPrice());
+        int specialCount = 0;
+        for (int i = 0; i < counter; i++) {
+
+
+            System.out.println(products[i]);
+            if (products[i].isSpecial()) {
+                specialCount++;
+            }
         }
-        System.out.println("Итого: " + getTotalPrice());
+        System.out.println("Total cost basket: " + totalCostBasket());
+        System.out.println("Специальных товаров: " + specialCount);
     }
 
+
     public boolean containsProductByName(String name) {
-        for (int i = 0; i < count; i++) {
-            if (products[i].getName().equals(name)) {
+        for (int i = 0; i < counter; i++) {
+            if (products[i].getName().equalsIgnoreCase(name)) {
                 return true;
             }
         }
@@ -54,7 +65,7 @@ public class ProductBasket {
         for (int i = 0; i < products.length; i++) {
             products[i] = null;
         }
-        count = 0;
+        counter = 0;
     }
 }
 
