@@ -68,4 +68,3 @@ public class ProductBasket {
         counter = 0;
     }
 }
-
