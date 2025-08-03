@@ -33,12 +33,61 @@ public class SearchEngine {
         for (int i = 0; i < currentIndex && foundCount < 5; i++) {
             Searchable item = searchableItems[i];
             if (item != null && item.getSearchTerm().toLowerCase().contains(lowerSearchString)) {
+
                 results[foundCount] = item;
                 foundCount++;
             }
+
         }
 
         return results;
+    }
+
+    public Searchable findBestMatch(String search) throws BestResultNotFound {
+        if (search == null || search.isEmpty()) {
+            throw new BestResultNotFound(search);
+        }
+
+        Searchable bestMatch = null;
+        int maxCount = -1;
+
+        for (int i = 0; i < currentIndex; i++) {
+            Searchable item = searchableItems[i];
+            if (item != null) {
+                String searchTerm = item.getSearchTerm().toLowerCase();
+                String searchLower = search.toLowerCase();
+                int count = countSubstringOccurrences(searchTerm, searchLower);
+
+                if (count > maxCount) {
+                    maxCount = count;
+                    bestMatch = item;
+                }
+            }
+        }
+
+        if (maxCount <= 0) {
+            throw new BestResultNotFound(search);
+        }
+        return bestMatch;
+    }
+
+
+    public int countSubstringOccurrences(String str, String substring) {
+        int count = 0;
+        int index = 0;
+        int substringLength = substring.length();
+
+        if (substringLength == 0) {
+            return 0;
+        }
+
+
+        while ((index = str.indexOf(substring, index)) != -1) {
+            count++;
+            index += substringLength;
+        }
+
+        return count;
     }
 
     @Override
