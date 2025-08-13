@@ -1,43 +1,34 @@
 package org.skypro.skyshop.search;
 
-import java.util.Arrays;
+import org.skypro.skyshop.product.Product;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SearchEngine {
-    private final Searchable[] searchableItems;
-    private int currentIndex;
+    private final List<Searchable> searchableItems;
 
-    public SearchEngine(int capacity) {
-        this.searchableItems = new Searchable[capacity];
-        this.currentIndex = 0;
+    public SearchEngine() {
+        this.searchableItems = new ArrayList<>();
     }
 
     public void add(Searchable item) {
-        if (currentIndex < searchableItems.length) {
-            searchableItems[currentIndex] = item;
-            currentIndex++;
-        } else {
-            System.out.println("В поисковом движке нет места");
-        }
+        searchableItems.add(item);
     }
 
-    public Searchable[] search(String searchString) {
-        Searchable[] results = new Searchable[5];
-        int foundCount = 0;
+    public List<Searchable> search(String searchString) {
+        List<Searchable> results = new ArrayList<>();
 
         if (searchString == null || searchString.trim().isEmpty()) {
-            return results;
+            return results; // возвращаем пустой список
         }
 
         String lowerSearchString = searchString.toLowerCase();
 
-        for (int i = 0; i < currentIndex && foundCount < 5; i++) {
-            Searchable item = searchableItems[i];
+        for (Searchable item : searchableItems) {
             if (item != null && item.getSearchTerm().toLowerCase().contains(lowerSearchString)) {
-
-                results[foundCount] = item;
-                foundCount++;
+                results.add(item);
             }
-
         }
 
         return results;
@@ -51,8 +42,7 @@ public class SearchEngine {
         Searchable bestMatch = null;
         int maxCount = -1;
 
-        for (int i = 0; i < currentIndex; i++) {
-            Searchable item = searchableItems[i];
+        for (Searchable item : searchableItems) {
             if (item != null) {
                 String searchTerm = item.getSearchTerm().toLowerCase();
                 String searchLower = search.toLowerCase();
@@ -65,12 +55,11 @@ public class SearchEngine {
             }
         }
 
-        if (maxCount <= 0) {
+        if (maxCount <= 0 || bestMatch == null) {
             throw new BestResultNotFound(search);
         }
         return bestMatch;
     }
-
 
     public int countSubstringOccurrences(String str, String substring) {
         int count = 0;
@@ -81,20 +70,37 @@ public class SearchEngine {
             return 0;
         }
 
-
         while ((index = str.indexOf(substring, index)) != -1) {
             count++;
             index += substringLength;
         }
-
         return count;
     }
+
+//    public List<Product> removeProductsByName(String name) {
+//        List<Product> removedProducts = new ArrayList<>();
+//
+//
+//        var iterator = searchableItems.iterator();
+//
+//        while (iterator.hasNext()) {
+//            Searchable item = iterator.next();
+//            if (item instanceof Product) {
+//                Product product = (Product) item;
+//                if (product.getName().equalsIgnoreCase(name)) {
+//                    removedProducts.add(product);
+//                    iterator.remove();
+//                }
+//            }
+//        }
+//
+//        return removedProducts;
+//    }
 
     @Override
     public String toString() {
         return "SearchEngine{" +
-                "searchableItems=" + Arrays.toString(searchableItems) +
-                ", currentIndex=" + currentIndex +
+                "searchableItems=" + searchableItems +
                 '}';
     }
 }
