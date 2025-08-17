@@ -4,9 +4,31 @@ import org.skypro.skyshop.product.Product;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class SearchEngine {
     private final List<Searchable> searchableItems;
+
+    public Map<String, List<Searchable>> searchAndSortByName(String searchString) {
+        Map<String, List<Searchable>> resultMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+        if (searchString == null || searchString.trim().isEmpty()) {
+            return resultMap;
+        }
+
+        String lowerSearchString = searchString.toLowerCase();
+
+        for (Searchable item : searchableItems) {
+            if (item != null && item.getSearchTerm().toLowerCase().contains(lowerSearchString)) {
+                String name = item.getSearchTerm();
+                resultMap.putIfAbsent(name, new ArrayList<>());
+                resultMap.get(name).add(item);
+            }
+        }
+
+        return resultMap;
+    }
 
     public SearchEngine() {
         this.searchableItems = new ArrayList<>();
