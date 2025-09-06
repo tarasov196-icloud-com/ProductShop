@@ -1,48 +1,65 @@
 package org.skypro.skyshop.search;
 
-import org.skypro.skyshop.product.Product;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.*;
+import java.util.Comparator;
 
 public class SearchEngine {
-    private final List<Searchable> searchableItems;
-
-    public Map<String, List<Searchable>> searchAndSortByName(String searchString) {
-        Map<String, List<Searchable>> resultMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-
-        if (searchString == null || searchString.trim().isEmpty()) {
-            return resultMap;
-        }
-
-        String lowerSearchString = searchString.toLowerCase();
-
-        for (Searchable item : searchableItems) {
-            if (item != null && item.getSearchTerm().toLowerCase().contains(lowerSearchString)) {
-                String name = item.getSearchTerm();
-                resultMap.putIfAbsent(name, new ArrayList<>());
-                resultMap.get(name).add(item);
-            }
-        }
-
-        return resultMap;
-    }
+    private final Set<Searchable> searchableItems;
 
     public SearchEngine() {
-        this.searchableItems = new ArrayList<>();
+        this.searchableItems = new HashSet<>();
     }
 
     public void add(Searchable item) {
         searchableItems.add(item);
     }
 
+    // Компаратор для сортировки по длине имени, затем по имени
+    public static class SearchableNameLengthComparator implements Comparator<Searchable> {
+        @Override
+        public int compare(Searchable o1, Searchable o2) {
+            int lengthCompare = Integer.compare(o1.getName().length(), o2.getName().length());
+            if (lengthCompare != 0) {
+                return lengthCompare;
+            }
+            return o1.getName().compareTo(o2.getName());
+        }
+    }
+
+
+    public Map<String, List<Searchable>> searchAndSortByName(String searchString) {
+        Map<String, List<Searchable>> groupedResults = new HashMap<>();
+
+        if (searchString == null || searchString.trim().isEmpty()) {
+            return groupedResults;
+        }
+
+        String lowerSearchString = searchString.toLowerCase();
+
+        for (Searchable item : searchableItems) {
+            if (item != null && item.getSearchTerm().toLowerCase().contains(lowerSearchString)) {
+                String contentType = item.getContentType();
+                groupedResults.putIfAbsent(contentType, new ArrayList<>());
+                groupedResults.get(contentType).add(item);
+            }
+        }
+
+        Comparator<Searchable> comparator = new SearchableNameLengthComparator();
+        for (List<Searchable> list : groupedResults.values()) {
+            list.sort(comparator);
+        }
+
+        return groupedResults;
+    }
+
+
     public List<Searchable> search(String searchString) {
         List<Searchable> results = new ArrayList<>();
 
         if (searchString == null || searchString.trim().isEmpty()) {
-            return results; // возвращаем пустой список
+            return results;
         }
 
         String lowerSearchString = searchString.toLowerCase();
@@ -56,6 +73,7 @@ public class SearchEngine {
         return results;
     }
 
+
     public Searchable findBestMatch(String search) throws BestResultNotFound {
         if (search == null || search.isEmpty()) {
             throw new BestResultNotFound(search);
@@ -63,11 +81,11 @@ public class SearchEngine {
 
         Searchable bestMatch = null;
         int maxCount = -1;
+        String searchLower = search.toLowerCase();
 
         for (Searchable item : searchableItems) {
             if (item != null) {
                 String searchTerm = item.getSearchTerm().toLowerCase();
-                String searchLower = search.toLowerCase();
                 int count = countSubstringOccurrences(searchTerm, searchLower);
 
                 if (count > maxCount) {
@@ -83,7 +101,7 @@ public class SearchEngine {
         return bestMatch;
     }
 
-    public int countSubstringOccurrences(String str, String substring) {
+    private int countSubstringOccurrences(String str, String substring) {
         int count = 0;
         int index = 0;
         int substringLength = substring.length();
@@ -99,30 +117,17 @@ public class SearchEngine {
         return count;
     }
 
-//    public List<Product> removeProductsByName(String name) {
-//        List<Product> removedProducts = new ArrayList<>();
-//
-//
-//        var iterator = searchableItems.iterator();
-//
-//        while (iterator.hasNext()) {
-//            Searchable item = iterator.next();
-//            if (item instanceof Product) {
-//                Product product = (Product) item;
-//                if (product.getName().equalsIgnoreCase(name)) {
-//                    removedProducts.add(product);
-//                    iterator.remove();
-//                }
-//            }
-//        }
-//
-//        return removedProducts;
-//    }
-
     @Override
     public String toString() {
         return "SearchEngine{" +
                 "searchableItems=" + searchableItems +
                 '}';
+    }
+
+
+    public static class BestResultNotFound extends Exception {
+        public BestResultNotFound(String search) {
+            super("Best result not found for search: " + search);
+        }
     }
 }

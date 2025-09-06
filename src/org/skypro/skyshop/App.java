@@ -39,7 +39,7 @@ public class App {
         searchEngine1.add(new Article("Игровые мониторы",
                 "ТОП-5 игровых мониторов 2023 года"));
 
-        System.out.println("Сортировка Мар");
+        System.out.println("Сортировка Сет");
 
         Map<String, List<Searchable>> SortedResultsNoutbuk = searchEngine1.searchAndSortByName("Ноутбук");
         for (Map.Entry<String,List<Searchable>>entry: SortedResultsNoutbuk.entrySet()){
