@@ -1,30 +1,42 @@
 package org.skypro.skyshop.basket;
 
 import org.skypro.skyshop.product.Product;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.*;
 
 public class ProductBasket {
-    private final List<Product> products;
+
+    private final Map<String, List<Product>> products;
 
     public ProductBasket() {
-        this.products = new ArrayList<>();
+        this.products = new HashMap<>();
     }
 
+
     public void addProduct(Product product) {
-        products.add(product);
+        if (product == null) {
+            return;
+        }
+        String name = product.getName();
+        products.computeIfAbsent(name, k -> new ArrayList<>()).add(product);
     }
+
 
     public int totalCostBasket() {
         int total = 0;
-        for (Product product : products) {
-            if (product != null) { // Защита от null, хотя в списке null не будет
-                total += (int) product.getPrice();
+        for (List<Product> productList : products.values()) {
+            for (Product product : productList) {
+                if (product != null) {
+                    total += (int) product.getPrice();
+                }
             }
         }
         return total;
     }
+
 
     public void printBasket() {
         if (products.isEmpty()) {
@@ -33,37 +45,25 @@ public class ProductBasket {
         }
         System.out.println("Содержимое корзины:");
         int specialCount = 0;
-        for (Product product : products) {
-            System.out.println(product);
-            if (product.isSpecial()) {
-                specialCount++;
+        for (Map.Entry<String, List<Product>> entry : products.entrySet()) {
+            for (Product product : entry.getValue()) {
+                System.out.println(product);
+                if (product.isSpecial()) {
+                    specialCount++;
+                }
             }
         }
         System.out.println("Total cost basket: " + totalCostBasket());
         System.out.println("Специальных товаров: " + specialCount);
     }
 
+
     public boolean containsProductByName(String name) {
-        for (Product product : products) {
-            if (product.getName().equalsIgnoreCase(name)) {
-                return true;
-            }
-        }
-        return false;
+        return products.containsKey(name);
     }
+
     public List<Product> removeProductsByName(String name) {
-        List<Product> removedProducts = new ArrayList<>();
-        Iterator<Product> iterator = products.iterator();
-
-        while (iterator.hasNext()) {
-            Product product = iterator.next();
-            if (product.getName().equalsIgnoreCase(name)) {
-                removedProducts.add(product);
-                iterator.remove();
-            }
-        }
-
-        return removedProducts;
+        return products.getOrDefault(name, new ArrayList<>());
     }
 
 
@@ -72,6 +72,10 @@ public class ProductBasket {
     }
 
     public List<Product> getProducts() {
-        return products;
+        List<Product> allProducts = new ArrayList<>();
+        for (List<Product> productList : products.values()) {
+            allProducts.addAll(productList);
+        }
+        return allProducts;
     }
 }
