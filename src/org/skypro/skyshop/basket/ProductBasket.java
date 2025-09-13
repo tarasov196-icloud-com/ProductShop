@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ProductBasket {
 
@@ -15,28 +16,19 @@ public class ProductBasket {
         this.products = new HashMap<>();
     }
 
-
     public void addProduct(Product product) {
-        if (product == null) {
-            return;
-        }
+        if (product == null) return;
         String name = product.getName();
         products.computeIfAbsent(name, k -> new ArrayList<>()).add(product);
     }
 
-
     public int totalCostBasket() {
-        int total = 0;
-        for (List<Product> productList : products.values()) {
-            for (Product product : productList) {
-                if (product != null) {
-                    total += (int) product.getPrice();
-                }
-            }
-        }
-        return total;
+        return products.values().stream()
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .mapToInt(p -> (int) p.getPrice())
+                .sum();
     }
-
 
     public void printBasket() {
         if (products.isEmpty()) {
@@ -44,38 +36,35 @@ public class ProductBasket {
             return;
         }
         System.out.println("Содержимое корзины:");
-        int specialCount = 0;
-        for (Map.Entry<String, List<Product>> entry : products.entrySet()) {
-            for (Product product : entry.getValue()) {
-                System.out.println(product);
-                if (product.isSpecial()) {
-                    specialCount++;
-                }
-            }
-        }
+        products.values().stream()
+                .flatMap(Collection::stream)
+                .forEach(System.out::println);
+
+        long specialCount = products.values().stream()
+                .flatMap(Collection::stream)
+                .filter(Product::isSpecial)
+                .count();
+
         System.out.println("Total cost basket: " + totalCostBasket());
         System.out.println("Специальных товаров: " + specialCount);
     }
-
 
     public boolean containsProductByName(String name) {
         return products.containsKey(name);
     }
 
     public List<Product> removeProductsByName(String name) {
-        return products.getOrDefault(name, new ArrayList<>());
+        List<Product> removed = products.remove(name);
+        return removed != null ? removed : new ArrayList<>();
     }
-
 
     public void clearBasket() {
         products.clear();
     }
 
     public List<Product> getProducts() {
-        List<Product> allProducts = new ArrayList<>();
-        for (List<Product> productList : products.values()) {
-            allProducts.addAll(productList);
-        }
-        return allProducts;
+        return products.values().stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 }
