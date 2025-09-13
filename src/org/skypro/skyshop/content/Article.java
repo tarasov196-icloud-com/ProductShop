@@ -6,6 +6,11 @@ public final class Article implements Searchable {
     private final String title;
     private final String text;
 
+    public Article(String title, String text) {
+        this.title = title;
+        this.text = text;
+    }
+
     public String getSearchTerm() {
         return title + " " + text;
     }
@@ -16,11 +21,6 @@ public final class Article implements Searchable {
 
     public String getName() {
         return title;
-    }
-
-    public Article(String title, String text) {
-        this.title = title;
-        this.text = text;
     }
 
     public String getTitle() {
@@ -35,5 +35,17 @@ public final class Article implements Searchable {
     public String toString() {
         return title + "\n" + text;
     }
-}
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Article article = (Article) o;
+        return title != null ? title.equals(article.title) : article.title == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return title != null ? title.hashCode() : 0;
+    }
+}
